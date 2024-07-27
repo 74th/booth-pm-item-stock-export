@@ -1,6 +1,8 @@
 interface Product {
     name: string;
+    variation: string;
     stock: string;
+    sold: string;
 }
 
 document.getElementById('extract-btn')?.addEventListener('click', () => {
@@ -20,26 +22,37 @@ document.getElementById('extract-btn')?.addEventListener('click', () => {
 });
 
 function extractDataFromPage(): Product[] {
-    const products = document.querySelectorAll('.product');
+    const itemTags = document.querySelectorAll('.item-name-with-stock');
     const data: Product[] = [];
 
-    products.forEach(product => {
-        const nameElement = product.querySelector('.product-name');
-        const stockElement = product.querySelector('.product-stock');
+    for (const itemTag of itemTags) {
+        const name = itemTag.querySelector(".item-label a")?.lastChild?.textContent || "";
+        const variationTags = itemTag.querySelectorAll(".dashboard-items-variation .row");
 
-        if (nameElement && stockElement) {
-            const name = nameElement.textContent || '';
-            const stock = stockElement.textContent || '';
-            data.push({ name, stock });
+        for (const variationTag of variationTags) {
+            const variation = variationTag.querySelector(".dashboard-items-variation-label")?.lastChild?.textContent || "";
+            const sold = variationTag.querySelector(".sales_quantity .count")?.lastChild?.textContent || "";
+            const stock = variationTag.querySelector(".stock")?.lastChild?.textContent || "";
+
+            data.push({
+                name: name,
+                variation: variation,
+                sold: sold,
+                stock: stock,
+            });
         }
-    });
-
+    }
     return data;
+}
+
+function csvEncode(org: string): string {
+    return "\"" + org.trim().replace("\"", "\\\"") + "\"";
 }
 
 function downloadCSV(data: Product[]): void {
     const csvContent = 'data:text/csv;charset=utf-8,'
-        + data.map(e => `${e.name},${e.stock}`).join('\n');
+        + 'Name,Variation,Sold,Stock\n'
+        + data.map(e => [csvEncode(e.name), csvEncode(e.variation), e.stock, e.sold].join(",")).join('\n');
 
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement('a');

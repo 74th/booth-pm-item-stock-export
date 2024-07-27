@@ -18,9 +18,5 @@
   "background": {
   },
   "content_scripts": [
-    {
-      "matches": ["https://manage.booth.pm/items"],
-      "js": ["content.js"]
-    }
   ]
 }
