@@ -34,7 +34,7 @@ function csvEncode(org: string): string {
 }
 
 function buildCSV(data: Product[]): string {
-    return 'Name,Variation,Sold,Stock\n'
+    return 'name,variation,sold,stock\n'
         + data.map(e => [csvEncode(e.name), csvEncode(e.variation), e.stock, e.sold].join(",")).join('\n');
 }
 

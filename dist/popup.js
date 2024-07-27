@@ -25,7 +25,7 @@ function csvEncode(org) {
     return "\"" + org.trim().replace("\"", "\\\"") + "\"";
 }
 function buildCSV(data) {
-    return 'Name,Variation,Sold,Stock\n'
+    return 'name,variation,sold,stock\n'
         + data.map(e => [csvEncode(e.name), csvEncode(e.variation), e.stock, e.sold].join(",")).join('\n');
 }
 (_a = document.getElementById('download-btn')) === null || _a === void 0 ? void 0 : _a.addEventListener('click', () => {
