@@ -1,21 +1,5 @@
 "use strict";
-var _a;
-(_a = document.getElementById('extract-btn')) === null || _a === void 0 ? void 0 : _a.addEventListener('click', () => {
-    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-        var _a;
-        if ((_a = tabs[0]) === null || _a === void 0 ? void 0 : _a.id) {
-            chrome.scripting.executeScript({
-                target: { tabId: tabs[0].id },
-                func: extractDataFromPage
-            }, (results) => {
-                if (results && results[0].result) {
-                    const data = results[0].result;
-                    downloadCSV(data);
-                }
-            });
-        }
-    });
-});
+var _a, _b;
 function extractDataFromPage() {
     var _a, _b, _c, _d, _e, _f, _g, _h;
     const itemTags = document.querySelectorAll('.item-name-with-stock');
@@ -40,10 +24,29 @@ function extractDataFromPage() {
 function csvEncode(org) {
     return "\"" + org.trim().replace("\"", "\\\"") + "\"";
 }
+function buildCSV(data) {
+    return 'Name,Variation,Sold,Stock\n'
+        + data.map(e => [csvEncode(e.name), csvEncode(e.variation), e.stock, e.sold].join(",")).join('\n');
+}
+(_a = document.getElementById('download-btn')) === null || _a === void 0 ? void 0 : _a.addEventListener('click', () => {
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+        var _a;
+        if ((_a = tabs[0]) === null || _a === void 0 ? void 0 : _a.id) {
+            chrome.scripting.executeScript({
+                target: { tabId: tabs[0].id },
+                func: extractDataFromPage
+            }, (results) => {
+                if (results && results[0].result) {
+                    const data = results[0].result;
+                    downloadCSV(data);
+                }
+            });
+        }
+    });
+});
 function downloadCSV(data) {
     const csvContent = 'data:text/csv;charset=utf-8,'
-        + 'Name,Variation,Sold,Stock\n'
-        + data.map(e => [csvEncode(e.name), csvEncode(e.variation), e.stock, e.sold].join(",")).join('\n');
+        + buildCSV(data);
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement('a');
     link.setAttribute('href', encodedUri);
@@ -51,4 +54,29 @@ function downloadCSV(data) {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+}
+(_b = document.getElementById('clipboard-btn')) === null || _b === void 0 ? void 0 : _b.addEventListener('click', () => {
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+        var _a;
+        if ((_a = tabs[0]) === null || _a === void 0 ? void 0 : _a.id) {
+            chrome.scripting.executeScript({
+                target: { tabId: tabs[0].id },
+                func: extractDataFromPage
+            }, (results) => {
+                if (results && results[0].result) {
+                    const data = results[0].result;
+                    clipboardCSV(data);
+                }
+            });
+        }
+    });
+});
+function clipboardCSV(data) {
+    const csvContent = buildCSV(data);
+    try {
+        navigator.clipboard.writeText(csvContent);
+    }
+    catch (err) {
+        console.error('Failed to copy: ', err);
+    }
 }

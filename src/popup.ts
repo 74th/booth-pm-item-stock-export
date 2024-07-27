@@ -5,22 +5,6 @@ interface Product {
     sold: string;
 }
 
-document.getElementById('extract-btn')?.addEventListener('click', () => {
-    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-        if (tabs[0]?.id) {
-            chrome.scripting.executeScript({
-                target: { tabId: tabs[0].id },
-                func: extractDataFromPage
-            }, (results) => {
-                if (results && results[0].result) {
-                    const data: Product[] = results[0].result;
-                    downloadCSV(data);
-                }
-            });
-        }
-    });
-});
-
 function extractDataFromPage(): Product[] {
     const itemTags = document.querySelectorAll('.item-name-with-stock');
     const data: Product[] = [];
@@ -49,10 +33,30 @@ function csvEncode(org: string): string {
     return "\"" + org.trim().replace("\"", "\\\"") + "\"";
 }
 
+function buildCSV(data: Product[]): string {
+    return 'Name,Variation,Sold,Stock\n'
+        + data.map(e => [csvEncode(e.name), csvEncode(e.variation), e.stock, e.sold].join(",")).join('\n');
+}
+
+document.getElementById('download-btn')?.addEventListener('click', () => {
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+        if (tabs[0]?.id) {
+            chrome.scripting.executeScript({
+                target: { tabId: tabs[0].id },
+                func: extractDataFromPage
+            }, (results) => {
+                if (results && results[0].result) {
+                    const data: Product[] = results[0].result;
+                    downloadCSV(data);
+                }
+            });
+        }
+    });
+});
+
 function downloadCSV(data: Product[]): void {
     const csvContent = 'data:text/csv;charset=utf-8,'
-        + 'Name,Variation,Sold,Stock\n'
-        + data.map(e => [csvEncode(e.name), csvEncode(e.variation), e.stock, e.sold].join(",")).join('\n');
+        + buildCSV(data)
 
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement('a');
@@ -61,4 +65,29 @@ function downloadCSV(data: Product[]): void {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+}
+
+document.getElementById('clipboard-btn')?.addEventListener('click', () => {
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+        if (tabs[0]?.id) {
+            chrome.scripting.executeScript({
+                target: { tabId: tabs[0].id },
+                func: extractDataFromPage
+            }, (results) => {
+                if (results && results[0].result) {
+                    const data: Product[] = results[0].result;
+                    clipboardCSV(data);
+                }
+            });
+        }
+    });
+});
+
+function clipboardCSV(data: Product[]): void {
+    const csvContent = buildCSV(data)
+    try {
+        navigator.clipboard.writeText(csvContent);
+    } catch (err) {
+        console.error('Failed to copy: ', err);
+    }
 }
