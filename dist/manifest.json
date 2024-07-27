@@ -1,0 +1,26 @@
+{
+  "manifest_version": 3,
+  "name": "Booth Stock Extractor",
+  "version": "1.0",
+  "description": "Extracts product names and stock counts from Booth.pm and downloads as CSV.",
+  "permissions": [
+    "activeTab",
+    "scripting"
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icon.png",
+      "48": "icon.png",
+      "128": "icon.png"
+    }
+  },
+  "background": {
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://manage.booth.pm/items"],
+      "js": ["content.js"]
+    }
+  ]
+}
