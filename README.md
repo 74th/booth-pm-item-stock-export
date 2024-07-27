@@ -14,6 +14,8 @@ https://manage.booth.pm/items
 
 拡張機能をクリックし、"Download"、もしくは"to Clipboard"をクリック
 
+## CSV サンプル
+
 ```csv
 Name,Variation,Sold,Stock
 "SparrowDial : M5StackCore2、M5Dialをトラックパッドとして搭載可能なGH60互換ケース対応自作キーボードキット[74TH-G040]","",2,5
