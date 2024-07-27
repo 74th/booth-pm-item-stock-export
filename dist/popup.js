@@ -6,7 +6,7 @@ var _a;
         if ((_a = tabs[0]) === null || _a === void 0 ? void 0 : _a.id) {
             chrome.scripting.executeScript({
                 target: { tabId: tabs[0].id },
-                function: extractDataFromPage
+                func: extractDataFromPage
             }, (results) => {
                 if (results && results[0].result) {
                     const data = results[0].result;
