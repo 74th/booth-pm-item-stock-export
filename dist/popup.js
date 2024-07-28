@@ -26,7 +26,7 @@ function csvEncode(org) {
 }
 function buildCSV(data) {
     return 'name,variation,sold,stock\n'
-        + data.map(e => [csvEncode(e.name), csvEncode(e.variation), e.stock, e.sold].join(",")).join('\n');
+        + data.map(e => [csvEncode(e.name), csvEncode(e.variation), e.sold, e.stock].join(",")).join('\n');
 }
 (_a = document.getElementById('download-btn')) === null || _a === void 0 ? void 0 : _a.addEventListener('click', () => {
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {

@@ -35,7 +35,7 @@ function csvEncode(org: string): string {
 
 function buildCSV(data: Product[]): string {
     return 'name,variation,sold,stock\n'
-        + data.map(e => [csvEncode(e.name), csvEncode(e.variation), e.stock, e.sold].join(",")).join('\n');
+        + data.map(e => [csvEncode(e.name), csvEncode(e.variation), e.sold, e.stock].join(",")).join('\n');
 }
 
 document.getElementById('download-btn')?.addEventListener('click', () => {
