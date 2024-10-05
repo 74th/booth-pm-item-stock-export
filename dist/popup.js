@@ -1,5 +1,5 @@
 "use strict";
-var _a, _b;
+var _a, _b, _c, _d;
 function extractDataFromPage() {
     var _a, _b, _c, _d, _e, _f, _g, _h;
     const itemTags = document.querySelectorAll('.item-name-with-stock');
@@ -28,7 +28,11 @@ function buildCSV(data) {
     return 'name,variation,sold,stock\n'
         + data.map(e => [csvEncode(e.name), csvEncode(e.variation), e.sold, e.stock].join(",")).join('\n');
 }
-(_a = document.getElementById('download-btn')) === null || _a === void 0 ? void 0 : _a.addEventListener('click', () => {
+function buildTSV(data) {
+    return 'name\tvariation\tsold\tstock\n'
+        + data.map(e => [csvEncode(e.name), csvEncode(e.variation), e.sold, e.stock].join("\t")).join('\n');
+}
+(_a = document.getElementById('download-csv-btn')) === null || _a === void 0 ? void 0 : _a.addEventListener('click', () => {
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
         var _a;
         if ((_a = tabs[0]) === null || _a === void 0 ? void 0 : _a.id) {
@@ -38,16 +42,34 @@ function buildCSV(data) {
             }, (results) => {
                 if (results && results[0].result) {
                     const data = results[0].result;
-                    downloadCSV(data);
+                    const csv = buildCSV(data);
+                    download(csv);
                 }
             });
         }
     });
 });
-function downloadCSV(data) {
-    const csvContent = 'data:text/csv;charset=utf-8,'
-        + buildCSV(data);
-    const encodedUri = encodeURI(csvContent);
+(_b = document.getElementById('download-tsv-btn')) === null || _b === void 0 ? void 0 : _b.addEventListener('click', () => {
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+        var _a;
+        if ((_a = tabs[0]) === null || _a === void 0 ? void 0 : _a.id) {
+            chrome.scripting.executeScript({
+                target: { tabId: tabs[0].id },
+                func: extractDataFromPage
+            }, (results) => {
+                if (results && results[0].result) {
+                    const data = results[0].result;
+                    const tsv = buildTSV(data);
+                    download(tsv);
+                }
+            });
+        }
+    });
+});
+function download(data) {
+    const content = 'data:text/csv;charset=utf-8,'
+        + data;
+    const encodedUri = encodeURI(content);
     const link = document.createElement('a');
     link.setAttribute('href', encodedUri);
     link.setAttribute('download', 'booth_stock.csv');
@@ -55,7 +77,7 @@ function downloadCSV(data) {
     link.click();
     document.body.removeChild(link);
 }
-(_b = document.getElementById('clipboard-btn')) === null || _b === void 0 ? void 0 : _b.addEventListener('click', () => {
+(_c = document.getElementById('clipboard-csv-btn')) === null || _c === void 0 ? void 0 : _c.addEventListener('click', () => {
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
         var _a;
         if ((_a = tabs[0]) === null || _a === void 0 ? void 0 : _a.id) {
@@ -65,16 +87,33 @@ function downloadCSV(data) {
             }, (results) => {
                 if (results && results[0].result) {
                     const data = results[0].result;
-                    clipboardCSV(data);
+                    const csv = buildCSV(data);
+                    copyToClipboard(csv);
                 }
             });
         }
     });
 });
-function clipboardCSV(data) {
-    const csvContent = buildCSV(data);
+(_d = document.getElementById('clipboard-tsv-btn')) === null || _d === void 0 ? void 0 : _d.addEventListener('click', () => {
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+        var _a;
+        if ((_a = tabs[0]) === null || _a === void 0 ? void 0 : _a.id) {
+            chrome.scripting.executeScript({
+                target: { tabId: tabs[0].id },
+                func: extractDataFromPage
+            }, (results) => {
+                if (results && results[0].result) {
+                    const data = results[0].result;
+                    const tsv = buildTSV(data);
+                    copyToClipboard(tsv);
+                }
+            });
+        }
+    });
+});
+function copyToClipboard(content) {
     try {
-        navigator.clipboard.writeText(csvContent);
+        navigator.clipboard.writeText(content);
     }
     catch (err) {
         console.error('Failed to copy: ', err);
